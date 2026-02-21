@@ -59,6 +59,12 @@ def root():
     return FileResponse("app/static/index.html")
 
 
+@app.get("/admin")
+def admin():
+    from fastapi.responses import FileResponse
+    return FileResponse("app/static/admin.html")
+
+
 @app.get("/login")
 @app.get("/register")
 @app.get("/pricing")

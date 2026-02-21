@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KeywordTracker 管理后台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .sidebar { width: 240px; }
+        .main-content { flex: 1; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="app">
+        <!-- Login Page -->
+        <div id="login-page" class="min-h-screen flex items-center justify-center">
+            <div class="bg-white p-8 rounded-lg shadow-md w-96">
+                <h1 class="text-2xl font-bold mb-6 text-center">KeywordTracker 登录</h1>
+                <form id="login-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">邮箱</label>
+                        <input type="email" id="login-email" class="w-full px-3 py-2 border rounded-lg" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">密码</label>
+                        <input type="password" id="login-password" class="w-full px-3 py-2 border rounded-lg" required>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">登录</button>
+                </form>
+                <p class="mt-4 text-center text-sm">
+                    还没有账号？<a href="#" onclick="showRegister()" class="text-blue-600">注册</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Register Page -->
+        <div id="register-page" class="min-h-screen flex items-center justify-center hidden">
+            <div class="bg-white p-8 rounded-lg shadow-md w-96">
+                <h1 class="text-2xl font-bold mb-6 text-center">KeywordTracker 注册</h1>
+                <form id="register-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">邮箱</label>
+                        <input type="email" id="reg-email" class="w-full px-3 py-2 border rounded-lg" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">用户名</label>
+                        <input type="text" id="reg-username" class="w-full px-3 py-2 border rounded-lg" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">密码</label>
+                        <input type="password" id="reg-password" class="w-full px-3 py-2 border rounded-lg" required>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">注册</button>
+                </form>
+                <p class="mt-4 text-center text-sm">
+                    已有账号？<a href="#" onclick="showLogin()" class="text-blue-600">登录</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="admin-page" class="flex hidden">
+            <!-- Sidebar -->
+            <div class="sidebar bg-white shadow-lg min-h-screen">
+                <div class="p-4 border-b">
+                    <h1 class="text-xl font-bold text-blue-600">KeywordTracker</h1>
+                </div>
+                <nav class="p-4 space-y-2">
+                    <a href="#" onclick="showPage('dashboard')" class="block px-4 py-2 rounded hover:bg-gray-100">📊 仪表盘</a>
+                    <a href="#" onclick="showPage('projects')" class="block px-4 py-2 rounded hover:bg-gray-100">📁 项目管理</a>
+                    <a href="#" onclick="showPage('keywords')" class="block px-4 py-2 rounded hover:bg-gray-100">🔍 关键词</a>
+                    <a href="#" onclick="showPage('settings')" class="block px-4 py-2 rounded hover:bg-gray-100">⚙️ 设置</a>
+                    <a href="#" onclick="logout()" class="block px-4 py-2 rounded hover:bg-gray-100 text-red-600">🚪 退出</a>
+                </nav>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content p-8">
+                <!-- Dashboard -->
+                <div id="page-dashboard">
+                    <h2 class="text-2xl font-bold mb-6">仪表盘</h2>
+                    <div class="grid grid-cols-4 gap-4 mb-8">
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <div class="text-3xl font-bold text-blue-600" id="stat-projects">0</div>
+                            <div class="text-gray-500">项目数</div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <div class="text-3xl font-bold text-green-600" id="stat-keywords">0</div>
+                            <div class="text-gray-500">关键词数</div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <div class="text-3xl font-bold text-orange-600" id="stat-credits">0</div>
+                            <div class="text-gray-500">剩余积分</div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <div class="text-3xl font-bold text-purple-600" id="stat-used">0</div>
+                            <div class="text-gray-500">本月消耗</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Projects -->
+                <div id="page-projects" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">项目管理</h2>
+                        <button onclick="showCreateProject()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">+ 新建项目</button>
+                    </div>
+                    <div id="projects-list" class="space-y-4"></div>
+                </div>
+
+                <!-- Keywords -->
+                <div id="page-keywords" class="hidden">
+                    <h2 class="text-2xl font-bold mb-6">关键词管理</h2>
+                    <div class="bg-white rounded-lg shadow p-4 mb-4">
+                        <div class="flex gap-4">
+                            <select id="project-select" class="border rounded px-3 py-2">
+                                <option value="">选择项目</option>
+                            </select>
+                            <input type="text" id="new-keyword" placeholder="输入关键词" class="border rounded px-3 py-2 flex-1">
+                            <select id="country-select" class="border rounded px-3 py-2">
+                                <option value="com">美国 (Google.com)</option>
+                                <option value="co.uk">英国</option>
+                                <option value="co.jp">日本</option>
+                                <option value="de">德国</option>
+                                <option value="fr">法国</option>
+                                <option value="com.au">澳大利亚</option>
+                                <option value="ca">加拿大</option>
+                                <option value="cn">中国</option>
+                            </select>
+                            <select id="interval-select" class="border rounded px-3 py-2">
+                                <option value="24">每天1次</option>
+                                <option value="48">2天1次</option>
+                                <option value="72">3天1次</option>
+                                <option value="168">7天1次</option>
+                            </select>
+                            <button onclick="addKeyword()" class="bg-blue-600 text-white px-4 py-2 rounded-lg">添加</button>
+                        </div>
+                    </div>
+                    <div id="keywords-list" class="space-y-2"></div>
+                </div>
+
+                <!-- Settings -->
+                <div id="page-settings" class="hidden">
+                    <h2 class="text-2xl font-bold mb-6">账户设置</h2>
+                    <div class="bg-white rounded-lg shadow p-6 max-w-lg">
+                        <h3 class="font-bold mb-4">充值积分</h3>
+                        <p class="text-gray-500 mb-4">联系管理员购买积分</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'https://rankingkeywords-production.up.railway.app/api';
+        let token = localStorage.getItem('token');
+        let userId = null;
+
+        // 页面切换
+        function showPage(page) {
+            ['dashboard', 'projects', 'keywords', 'settings'].forEach(p => {
+                document.getElementById('page-' + p).classList.add('hidden');
+            });
+            document.getElementById('page-' + page).classList.remove('hidden');
+            if (page === 'dashboard') loadDashboard();
+            if (page === 'projects') loadProjects();
+            if (page === 'keywords') loadKeywords();
+        }
+
+        function showLogin() {
+            document.getElementById('login-page').classList.remove('hidden');
+            document.getElementById('register-page').classList.add('hidden');
+            document.getElementById('admin-page').classList.add('hidden');
+        }
+
+        function showRegister() {
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('register-page').classList.remove('hidden');
+            document.getElementById('admin-page').classList.add('hidden');
+        }
+
+        // 登录
+        document.getElementById('login-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            const formData = new URLSearchParams();
+            formData.append('username', email);
+            formData.append('password', password);
+
+            const res = await fetch(API + '/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                token = data.access_token;
+                localStorage.setItem('token', token);
+                showAdmin();
+            } else {
+                alert('登录失败');
+            }
+        };
+
+        // 注册
+        document.getElementById('register-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('reg-email').value;
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+
+            const res = await fetch(API + '/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, username, password })
+            });
+
+            if (res.ok) {
+                showLogin();
+                alert('注册成功，请登录');
+            } else {
+                alert('注册失败');
+            }
+        };
+
+        function showAdmin() {
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('register-page').classList.add('hidden');
+            document.getElementById('admin-page').classList.remove('hidden');
+            loadDashboard();
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            token = null;
+            showLogin();
+        }
+
+        // 加载仪表盘
+        async function loadDashboard() {
+            const res = await fetch(API + '/users/dashboard', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('stat-projects').textContent = data.total_projects;
+                document.getElementById('stat-keywords').textContent = data.total_keywords;
+                document.getElementById('stat-credits').textContent = data.credits_remaining;
+                document.getElementById('stat-used').textContent = data.credits_used_this_month;
+            }
+        }
+
+        // 加载项目
+        async function loadProjects() {
+            const res = await fetch(API + '/projects', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (res.ok) {
+                const projects = await res.json();
+                const list = document.getElementById('projects-list');
+                if (projects.length === 0) {
+                    list.innerHTML = '<p class="text-gray-500">暂无项目</p>';
+                } else {
+                    list.innerHTML = projects.map(p => `
+                        <div class="bg-white p-4 rounded-lg shadow flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold">${p.name}</h3>
+                                <p class="text-sm text-gray-500">${p.keywords_count} 个关键词</p>
+                            </div>
+                            <button onclick="deleteProject(${p.id})" class="text-red-600">删除</button>
+                        </div>
+                    `).join('');
+                }
+                
+                // 更新项目下拉
+                const select = document.getElementById('project-select');
+                select.innerHTML = projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            }
+        }
+
+        // 创建项目
+        async function createProject(name) {
+            const res = await fetch(API + '/projects', {
+                method: 'POST',
+                headers: { 
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name })
+            });
+            if (res.ok) {
+                loadProjects();
+                return true;
+            }
+            return false;
+        }
+
+        function showCreateProject() {
+            const name = prompt('请输入项目名称:');
+            if (name) createProject(name);
+        }
+
+        async function deleteProject(id) {
+            if (!confirm('确定删除？')) return;
+            await fetch(API + '/projects/' + id, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            loadProjects();
+        }
+
+        // 加载关键词
+        async function loadKeywords() {
+            const projectId = document.getElementById('project-select').value;
+            if (!projectId) return;
+
+            const res = await fetch(API + '/projects/' + projectId + '/keywords', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (res.ok) {
+                const keywords = await res.json();
+                const list = document.getElementById('keywords-list');
+                if (keywords.length === 0) {
+                    list.innerHTML = '<p class="text-gray-500">暂无关键词</p>';
+                } else {
+                    list.innerHTML = keywords.map(k => `
+                        <div class="bg-white p-4 rounded-lg shadow flex justify-between items-center">
+                            <div>
+                                <span class="font-bold">${k.keyword}</span>
+                                <span class="text-sm text-gray-500 ml-2">${k.country_code} / ${k.tracking_interval_hours}h</span>
+                            </div>
+                            <button onclick="deleteKeyword(${k.id})" class="text-red-600">删除</button>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        async function addKeyword() {
+            const projectId = document.getElementById('project-select').value;
+            const keyword = document.getElementById('new-keyword').value;
+            const country = document.getElementById('country-select').value;
+            const interval = document.getElementById('interval-select').value;
+
+            if (!projectId || !keyword) {
+                alert('请选择项目并输入关键词');
+                return;
+            }
+
+            const res = await fetch(API + '/projects/' + projectId + '/keywords', {
+                method: 'POST',
+                headers: { 
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    keyword, 
+                    country_code: country,
+                    tracking_interval_hours: parseInt(interval)
+                })
+            });
+
+            if (res.ok) {
+                document.getElementById('new-keyword').value = '';
+                loadKeywords();
+            } else {
+                alert('添加失败');
+            }
+        }
+
+        async function deleteKeyword(id) {
+            await fetch(API + '/keywords/' + id, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            loadKeywords();
+        }
+
+        // 初始化
+        if (token) {
+            showAdmin();
+        } else {
+            showLogin();
+        }
+
+        document.getElementById('project-select').onchange = loadKeywords;
+    </script>
+</body>
+</html>
