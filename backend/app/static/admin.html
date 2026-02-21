@@ -164,7 +164,7 @@
             document.getElementById('page-' + page).classList.remove('hidden');
             if (page === 'dashboard') loadDashboard();
             if (page === 'projects') loadProjects();
-            if (page === 'keywords') loadKeywords();
+            if (page === 'keywords') { loadProjects(); loadKeywords(); }
         }
 
         function showLogin() {
