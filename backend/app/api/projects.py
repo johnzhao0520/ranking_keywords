@@ -183,13 +183,28 @@ def get_keywords(
     
     result = []
     for k in keywords:
-        latest_result = db.query(RankResult).filter(
-            RankResult.keyword_id == k.id
-        ).order_by(RankResult.checked_at.desc()).first()
+        try:
+            latest_result = db.query(RankResult).filter(
+                RankResult.keyword_id == k.id
+            ).order_by(RankResult.checked_at.desc()).first()
+        except:
+            latest_result = None
         
-        results_count = db.query(RankResult).filter(
-            RankResult.keyword_id == k.id
-        ).count()
+        try:
+            results_count = db.query(RankResult).filter(
+                RankResult.keyword_id == k.id
+            ).count()
+        except:
+            results_count = 0
+        
+        rank = None
+        url = None
+        if latest_result:
+            try:
+                rank = latest_result.rank
+                url = latest_result.url
+            except:
+                pass
         
         result.append(KeywordWithResults(
             id=k.id,
@@ -201,8 +216,8 @@ def get_keywords(
             is_active=k.is_active,
             created_at=k.created_at,
             results_count=results_count,
-            latest_rank=latest_result.rank if latest_result else None,
-            latest_url=latest_result.url if latest_result else None
+            latest_rank=rank,
+            latest_url=url
         ))
     
     return result
