@@ -8,7 +8,7 @@ from app.core.database import Base, engine
 from app.core.logging import logger
 from app.core.logging_middleware import LoggingMiddleware
 from app.core.exception_handlers import global_exception_handler, http_exception_handler
-from app.api import auth, users, projects, tracking
+from app.api import auth, users, projects, tracking, keywords
 
 
 @asynccontextmanager
@@ -50,6 +50,7 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 app.include_router(projects.router, prefix="/api")
 app.include_router(tracking.router, prefix="/api")
+app.include_router(keywords.router, prefix="/api")
 
 
 @app.get("/")

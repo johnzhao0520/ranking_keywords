@@ -171,11 +171,18 @@ class RankResultResponse(BaseModel):
     url: Optional[str]
     title: Optional[str]
     snippet: Optional[str]
+    serp_results: Optional[str]  # JSON string of top 10 results
     credits_used: int
     checked_at: datetime
 
     class Config:
         from_attributes = True
+
+
+class KeywordHistoryResponse(BaseModel):
+    keyword_id: int
+    keyword: str
+    history: List[RankResultResponse]
 
 
 class ManualTrackRequest(BaseModel):

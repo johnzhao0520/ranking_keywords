@@ -147,6 +147,8 @@ class RankResult(Base):
     url = Column(Text)  # URL that ranked
     title = Column(Text)  # Page title
     snippet = Column(Text)  # Search snippet
+    # Top 10 SERP results (JSON)
+    serp_results = Column(Text)  # JSON: [{"position":1,"url":"...","title":"...","domain":"..."},...]
     credits_used = Column(Integer, default=1)
     checked_at = Column(DateTime(timezone=True), server_default=func.now())
 

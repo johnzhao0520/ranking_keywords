@@ -328,15 +328,125 @@
                 } else {
                     list.innerHTML = keywords.map(k => `
                         <div class="bg-white p-4 rounded-lg shadow flex justify-between items-center">
-                            <div>
+                            <div class="cursor-pointer flex-1" onclick="showKeywordHistory(${k.id}, '${k.keyword}')">
                                 <span class="font-bold">${k.keyword}</span>
                                 <span class="text-sm text-gray-500 ml-2">${k.country_code} / ${k.tracking_interval_hours}h</span>
+                                ${k.latest_rank ? `<span class="ml-2 px-2 py-1 bg-green-100 text-green-700 rounded">#${k.latest_rank}</span>` : ''}
                             </div>
-                            <button onclick="deleteKeyword(${k.id})" class="text-red-600">删除</button>
+                            <button onclick="deleteKeyword(${k.id})" class="text-red-600 ml-4">删除</button>
                         </div>
                     `).join('');
                 }
             }
+        }
+
+        // 显示关键词历史曲线
+        async function showKeywordHistory(keywordId, keyword) {
+            const res = await fetch(API + '/keywords/' + keywordId + '/history', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (!res.ok) {
+                alert('获取历史失败');
+                return;
+            }
+            
+            const data = await res.json();
+            
+            // 构建弹窗内容
+            let html = `
+                <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onclick="this.remove()">
+                    <div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-auto" onclick="event.stopPropagation()">
+                        <h3 class="text-xl font-bold mb-4">${keyword} - 排名历史</h3>
+                        <div class="mb-4">
+                            <canvas id="rankChart" height="200"></canvas>
+                        </div>
+                        <h4 class="font-bold mb-2">历史记录（点击查看详情）</h4>
+                        <div class="space-y-2 max-h-60 overflow-auto">
+            `;
+            
+            // 按日期分组显示历史
+            const history = data.history || [];
+            for (const h of history) {
+                const date = new Date(h.checked_at).toLocaleString('zh-CN');
+                let serpHtml = '';
+                if (h.serp_results) {
+                    try {
+                        const serp = JSON.parse(h.serp_results);
+                        serpHtml = `<div class="mt-2 text-xs text-gray-500">
+                            <div class="font-bold mb-1">Top 10 竞争对手：</div>
+                            ${serp.slice(0,10).map((r, i) => `<div>#${r.position} <a href="${r.link}" target="_blank" class="text-blue-600 hover:underline">${r.title?.substring(0,50)}</a> (${r.domain})</div>`).join('')}
+                        </div>`;
+                    } catch(e) {}
+                }
+                
+                html += `
+                    <div class="border rounded p-2 cursor-pointer hover:bg-gray-50" onclick="this.querySelector('.details').classList.toggle('hidden')">
+                        <div class="flex justify-between">
+                            <span class="font-bold">${date}</span>
+                            <span class="px-2 py-1 bg-green-100 rounded">#${h.rank || '-'}</span>
+                        </div>
+                        <div class="details hidden mt-2">
+                            <div class="text-sm">${h.title || ''}</div>
+                            <div class="text-xs text-gray-500 break-all">${h.url || ''}</div>
+                            ${serpHtml}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += `
+                        </div>
+                        <button onclick="this.parentElement.parentElement.remove()" class="mt-4 w-full bg-gray-200 py-2 rounded">关闭</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', html);
+            
+            // 绘制曲线图
+            drawRankChart(history.reverse());
+        }
+
+        // 绘制排名曲线
+        function drawRankChart(history) {
+            const ctx = document.getElementById('rankChart');
+            if (!ctx) return;
+            
+            // 使用 Chart.js CDN
+            if (typeof Chart === 'undefined') {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+                script.onload = () => renderChart(ctx, history);
+                document.head.appendChild(script);
+            } else {
+                renderChart(ctx, history);
+            }
+        }
+
+        function renderChart(ctx, history) {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: history.map(h => new Date(h.checked_at).toLocaleDateString()),
+                    datasets: [{
+                        label: '排名',
+                        data: history.map(h => h.rank),
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            reverse: true,
+                            title: { display: true, text: '排名' }
+                        }
+                    }
+                }
+            });
         }
 
         async function addKeyword() {
