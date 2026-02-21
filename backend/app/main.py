@@ -59,6 +59,13 @@ def root():
     return FileResponse("app/static/index.html")
 
 
+@app.get("/login")
+@app.get("/register")
+@app.get("/pricing")
+def coming_soon():
+    return {"message": "Coming soon! API is working."}
+
+
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
