@@ -55,7 +55,8 @@ app.include_router(tracking.router, prefix="/api")
 @app.get("/")
 def root():
     logger.info("Root endpoint accessed")
-    return {"message": f"Welcome to {settings.APP_NAME} API"}
+    from fastapi.responses import FileResponse
+    return FileResponse("app/static/index.html")
 
 
 @app.get("/health")
