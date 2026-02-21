@@ -1,0 +1,68 @@
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from contextlib import asynccontextmanager
+
+from app.core.config import settings
+from app.core.database import Base, engine
+from app.core.logging import logger
+from app.core.logging_middleware import LoggingMiddleware
+from app.core.exception_handlers import global_exception_handler, http_exception_handler
+from app.api import auth, users, projects, tracking
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Create tables
+    logger.info("Starting application...")
+    Base.metadata.create_all(bind=engine)
+    logger.info("Database tables created")
+    yield
+    # Shutdown
+    logger.info("Shutting down application...")
+
+
+app = FastAPI(
+    title=settings.APP_NAME,
+    description="Google Keyword Tracking Tool API",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Logging middleware
+app.add_middleware(LoggingMiddleware)
+
+# Exception handlers
+app.add_exception_handler(Exception, global_exception_handler)
+app.add_exception_handler(HTTPException, http_exception_handler)
+
+# Include routers
+app.include_router(auth.router, prefix="/api")
+app.include_router(users.router, prefix="/api")
+app.include_router(projects.router, prefix="/api")
+app.include_router(tracking.router, prefix="/api")
+
+
+@app.get("/")
+def root():
+    logger.info("Root endpoint accessed")
+    return {"message": f"Welcome to {settings.APP_NAME} API"}
+
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

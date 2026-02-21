@@ -1,0 +1,17 @@
+2026-02-21 21:28:14,051 - keyword_tracker - INFO - main.py:17 - Starting application...
+2026-02-21 21:28:14,167 - keyword_tracker - INFO - main.py:19 - Database tables created
+2026-02-21 21:28:15,656 - keyword_tracker - INFO - logging_middleware.py:13 - Request: GET /health
+2026-02-21 21:28:15,665 - keyword_tracker - INFO - logging_middleware.py:29 - Response: 200 - 0.009s
+2026-02-21 21:28:51,618 - keyword_tracker - INFO - logging_middleware.py:13 - Request: POST /api/auth/register
+2026-02-21 21:28:52,157 - keyword_tracker - INFO - logging_middleware.py:29 - Response: 200 - 0.539s
+2026-02-21 21:29:05,780 - keyword_tracker - INFO - logging_middleware.py:13 - Request: POST /api/auth/login
+2026-02-21 21:29:06,084 - keyword_tracker - INFO - logging_middleware.py:29 - Response: 200 - 0.304s
+2026-02-21 21:29:13,679 - keyword_tracker - INFO - logging_middleware.py:13 - Request: GET /api/auth/me
+2026-02-21 21:29:13,690 - keyword_tracker - WARNING - exception_handlers.py:34 - HTTP exception: 401 - Could not validate credentials
+2026-02-21 21:29:13,690 - keyword_tracker - INFO - logging_middleware.py:29 - Response: 401 - 0.011s
+2026-02-21 21:29:30,689 - keyword_tracker - INFO - logging_middleware.py:13 - Request: POST /api/auth/login
+2026-02-21 21:29:30,999 - keyword_tracker - INFO - logging_middleware.py:29 - Response: 200 - 0.310s
+2026-02-21 21:29:31,027 - keyword_tracker - INFO - logging_middleware.py:13 - Request: GET /api/auth/me
+2026-02-21 21:29:31,030 - keyword_tracker - WARNING - exception_handlers.py:34 - HTTP exception: 401 - Could not validate credentials
+2026-02-21 21:29:31,030 - keyword_tracker - INFO - logging_middleware.py:29 - Response: 401 - 0.003s
+2026-02-21 21:39:31,604 - keyword_tracker - INFO - main.py:22 - Shutting down application...

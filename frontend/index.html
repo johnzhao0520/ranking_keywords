@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KeywordTracker - 专业Google关键词追踪工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-b from-blue-50 to-white min-h-screen">
+    <!-- Header -->
+    <header class="container mx-auto px-4 py-6">
+        <nav class="flex items-center justify-between">
+            <div class="text-2xl font-bold text-blue-600">KeywordTracker</div>
+            <div class="flex items-center gap-4">
+                <a href="/login" class="text-gray-600 hover:text-blue-600">登录</a>
+                <a href="/register" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">开始免费试用</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero -->
+    <section class="container mx-auto px-4 py-20 text-center">
+        <h1 class="text-5xl font-bold text-gray-900 mb-6">
+            专业的 Google 关键词追踪工具
+        </h1>
+        <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            精准追踪关键词排名，实时监控竞争对手，解放你的 SEO 工作流程
+        </p>
+        <div class="flex gap-4 justify-center">
+            <a href="/register" class="bg-blue-600 text-white text-lg px-8 py-3 rounded-lg hover:bg-blue-700">
+                免费试用
+            </a>
+            <a href="#pricing" class="border border-gray-300 text-lg px-8 py-3 rounded-lg hover:bg-gray-50">
+                查看价格
+            </a>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="bg-gray-50 py-20">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">核心功能</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-sm border text-center">
+                    <div class="text-4xl mb-4">🌍</div>
+                    <h3 class="text-xl font-semibold mb-2">多国家追踪</h3>
+                    <p class="text-gray-600">支持全球 200+ Google 域名，精准定位目标市场</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-sm border text-center">
+                    <div class="text-4xl mb-4">💰</div>
+                    <h3 class="text-xl font-semibold mb-2">智能积分制</h3>
+                    <p class="text-gray-600">按需付费，前100名追踪仅需10积分，灵活高效</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-sm border text-center">
+                    <div class="text-4xl mb-4">📊</div>
+                    <h3 class="text-xl font-semibold mb-2">实时监控</h3>
+                    <p class="text-gray-600">自定义追踪间隔，实时掌握排名变化趋势</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" class="py-20">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-4">价格方案</h2>
+            <p class="text-gray-600 text-center mb-12">灵活定价，总有一款适合你</p>
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <!-- Basic -->
+                <div class="p-8 rounded-xl border-2 border-gray-200">
+                    <h3 class="text-xl font-semibold">基础版</h3>
+                    <div class="my-4">
+                        <span class="text-4xl font-bold">¥99</span>
+                        <span class="text-gray-500">/月</span>
+                    </div>
+                    <p class="text-gray-600 mb-6">1,000 积分</p>
+                    <ul class="space-y-2 mb-8 text-gray-600">
+                        <li>✓ 5-10 关键词</li>
+                        <li>✓ 每日追踪</li>
+                        <li>✓ Email 支持</li>
+                    </ul>
+                    <a href="/register" class="block text-center border border-gray-300 py-3 rounded-lg hover:bg-gray-50">
+                        立即购买
+                    </a>
+                </div>
+                <!-- Pro -->
+                <div class="p-8 rounded-xl border-2 border-blue-500 bg-blue-50 relative">
+                    <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs px-3 py-1 rounded-full">
+                        最受欢迎
+                    </span>
+                    <h3 class="text-xl font-semibold mt-2">专业版</h3>
+                    <div class="my-4">
+                        <span class="text-4xl font-bold">¥399</span>
+                        <span class="text-gray-500">/月</span>
+                    </div>
+                    <p class="text-gray-600 mb-6">5,000 积分</p>
+                    <ul class="space-y-2 mb-8 text-gray-600">
+                        <li>✓ 20-50 关键词</li>
+                        <li>✓ 每小时追踪</li>
+                        <li>✓ 优先支持</li>
+                        <li>✓ API 访问</li>
+                    </ul>
+                    <a href="/register" class="block text-center bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700">
+                        立即购买
+                    </a>
+                </div>
+                <!-- Enterprise -->
+                <div class="p-8 rounded-xl border-2 border-gray-200">
+                    <h3 class="text-xl font-semibold">企业版</h3>
+                    <div class="my-4">
+                        <span class="text-4xl font-bold">¥999</span>
+                        <span class="text-gray-500">/月</span>
+                    </div>
+                    <p class="text-gray-600 mb-6">15,000 积分</p>
+                    <ul class="space-y-2 mb-8 text-gray-600">
+                        <li>✓ 无限关键词</li>
+                        <li>✓ 实时追踪</li>
+                        <li>✓ 专属客服</li>
+                        <li>✓ 定制报告</li>
+                    </ul>
+                    <a href="/register" class="block text-center border border-gray-300 py-3 rounded-lg hover:bg-gray-50">
+                        立即购买
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-12">
+        <div class="container mx-auto px-4 text-center">
+            <p>© 2026 KeywordTracker. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
