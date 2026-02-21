@@ -1,6 +1,7 @@
 {
   "build": {
-    "builder": "python"
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "backend/Dockerfile"
   },
   "deploy": {
     "numReplicas": 1,
