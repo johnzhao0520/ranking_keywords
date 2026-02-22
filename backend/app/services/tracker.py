@@ -12,7 +12,7 @@ import asyncio
 
 class GoogleTracker:
     def __init__(self, api_key: str = None):
-        self.api_key = api_key or settings.SERPER_API_KEY
+        self.api_key = (api_key or settings.SERPER_API_KEY or "").strip()
         self.base_url = "https://google.serper.dev/search"
     
     async def track_keyword(
