@@ -69,15 +69,13 @@ async def track_keyword(
             snippet = r.get("snippet")
             break
     
-    # If no match, record first result
-    if not rank and results:
-        rank = 1
-        url = results[0].get("link")
-        title = results[0].get("title")
-        snippet = results[0].get("snippet")
+    # If no match, keyword is not in top 100
+    if not rank:
+        # 只记录追踪，但不记录具体排名
+        pass
     
-    # Calculate and deduct credits
-    credits_used = google_tracker.calculate_credits(rank) if rank else 1
+    # Calculate and deduct credits (always 1 credit per tracking)
+    credits_used = 1
     
     # Deduct credits
     subscription.credits -= credits_used

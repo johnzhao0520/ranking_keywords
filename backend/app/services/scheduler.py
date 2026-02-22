@@ -61,15 +61,12 @@ async def track_keyword_task(keyword_id: int):
                 snippet = r.get("snippet")
                 break
         
-        # 如果没匹配到，记录第一个结果
-        if not rank and results_list:
-            rank = 1
-            url = results_list[0].get("link")
-            title = results_list[0].get("title")
-            snippet = results_list[0].get("snippet")
-        
-        # 计算积分
-        credits_used = google_tracker.calculate_credits(rank) if rank else 1
+        # 如果没匹配到目标域名，不记录排名（不在前100名）
+        if not rank:
+            logger.info(f"关键词 {keyword.keyword} 未在前100名找到目标域名 {target_domain}")
+            # 仍记录一次追踪，但 rank 设为 null
+            rank = None
+            credits_used = 1  # 每次追踪消耗1积分
         
         # 扣除积分
         subscription.credits -= credits_used
