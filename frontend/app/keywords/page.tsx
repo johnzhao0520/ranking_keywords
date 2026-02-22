@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 
 interface Keyword {
   id: number;
@@ -41,10 +41,10 @@ const INTERVAL_OPTIONS = [
   { value: 24, label: "每天" },
 ];
 
-function KeywordsContent() {
-  const searchParams = useSearchParams();
-  const projectId = searchParams.get("project");
-
+export default function KeywordsPage() {
+  const params = useParams();
+  const router = useRouter();
+  
   const [keywords, setKeywords] = useState<Keyword[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -62,11 +62,11 @@ function KeywordsContent() {
   }, []);
 
   useEffect(() => {
-    if (projectId) {
-      const proj = projects.find((p) => p.id === parseInt(projectId));
-      if (proj) setSelectedProject(proj);
+    if (projects.length > 0 && !selectedProject) {
+      // 默认选择第一个项目
+      setSelectedProject(projects[0]);
     }
-  }, [projectId, projects]);
+  }, [projects, selectedProject]);
 
   useEffect(() => {
     if (selectedProject) {
@@ -82,9 +82,8 @@ function KeywordsContent() {
       if (res.ok) {
         const data = await res.json();
         setProjects(data);
-        if (!selectedProject && data.length > 0) {
-          const pid = projectId ? parseInt(projectId) : data[0].id;
-          setSelectedProject(data.find((p: Project) => p.id === pid) || data[0]);
+        if (data.length > 0) {
+          setSelectedProject(data[0]);
         }
       }
     } catch (error) {
@@ -178,7 +177,7 @@ function KeywordsContent() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-500 mb-4">请先创建项目</p>
-          <a href="/projects" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+          <a href="/projects/" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
             去创建项目
           </a>
         </div>
@@ -357,21 +356,5 @@ function KeywordsContent() {
         </div>
       </main>
     </div>
-  );
-}
-
-function KeywordsLoading() {
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      加载中...
-    </div>
-  );
-}
-
-export default function KeywordsPage() {
-  return (
-    <Suspense fallback={<KeywordsLoading />}>
-      <KeywordsContent />
-    </Suspense>
   );
 }
