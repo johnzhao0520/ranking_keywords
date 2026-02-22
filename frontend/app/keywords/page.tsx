@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 interface Keyword {
@@ -41,7 +41,7 @@ const INTERVAL_OPTIONS = [
   { value: 24, label: "每天" },
 ];
 
-export default function KeywordsPage() {
+function KeywordsContent() {
   const searchParams = useSearchParams();
   const projectId = searchParams.get("project");
 
@@ -357,5 +357,21 @@ export default function KeywordsPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+function KeywordsLoading() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      加载中...
+    </div>
+  );
+}
+
+export default function KeywordsPage() {
+  return (
+    <Suspense fallback={<KeywordsLoading />}>
+      <KeywordsContent />
+    </Suspense>
   );
 }
