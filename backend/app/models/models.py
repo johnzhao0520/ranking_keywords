@@ -96,6 +96,8 @@ class Project(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     name = Column(String(255), nullable=False)
     description = Column(Text)
+    root_domain = Column(String(255), nullable=False)  # 如 narwal.com
+    subdomain = Column(String(255))  # 如 ca.narwal.com
     notification_channels = Column(JSON, default=list)  # Email, webhook, etc.
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -125,8 +127,7 @@ class Keyword(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
-    keyword = Column(String(500))
-    target_url = Column(String(500), nullable=False)
+    keyword = Column(String(500), nullable=False)  # 关键词
     country_code = Column(String(10), default="com")  # Google country: com, co.uk, co.jp, etc.
     language = Column(String(10), default="en")
     tracking_interval_hours = Column(Integer, default=24)  # 1, 6, 12, 24
