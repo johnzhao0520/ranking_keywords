@@ -113,10 +113,10 @@
                     <h2 class="text-2xl font-bold mb-6">关键词管理</h2>
                     <div class="bg-white rounded-lg shadow p-4 mb-4">
                         <div class="flex gap-4">
-                            <select id="project-select" class="border rounded px-3 py-2">
+                            <select id="project-select" class="border rounded px-3 py-2" onchange="loadKeywords()">
                                 <option value="">选择项目</option>
                             </select>
-                            <input type="text" id="new-keyword" placeholder="目标网址 (如 example.com)" class="border rounded px-3 py-2 flex-1">
+                            <input type="text" id="new-keyword" placeholder="输入关键词" class="border rounded px-3 py-2 flex-1">
                             <select id="country-select" class="border rounded px-3 py-2">
                                 <option value="com">美国 (Google.com)</option>
                                 <option value="co.uk">英国</option>
@@ -135,6 +135,7 @@
                             </select>
                             <button onclick="addKeyword()" class="bg-blue-600 text-white px-4 py-2 rounded-lg">添加</button>
                         </div>
+                        <div id="keyword-target" class="mt-2 text-sm text-gray-500"></div>
                     </div>
                     <div id="keywords-list" class="space-y-2"></div>
                 </div>
@@ -268,7 +269,7 @@
                         <div class="bg-white p-4 rounded-lg shadow flex justify-between items-center">
                             <div>
                                 <h3 class="font-bold">${p.name}</h3>
-                                <p class="text-sm text-gray-500">${p.keywords_count} 个关键词</p>
+                                <p class="text-sm text-gray-500">${p.root_domain}${p.subdomain ? ' / ' + p.subdomain : ''} | ${p.keywords_count} 个关键词</p>
                             </div>
                             <button onclick="deleteProject(${p.id})" class="text-red-600">删除</button>
                         </div>
@@ -277,19 +278,19 @@
                 
                 // 更新项目下拉
                 const select = document.getElementById('project-select');
-                select.innerHTML = projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+                select.innerHTML = '<option value="">选择项目</option>' + projects.map(p => `<option value="${p.id}" data-root="${p.root_domain}" data-sub="${p.subdomain || ''}">${p.name} (${p.subdomain || p.root_domain})</option>`).join('');
             }
         }
 
-        // 创建项目
-        async function createProject(name) {
+        // 创建项目 - 带域名
+        async function createProject(name, root_domain, subdomain) {
             const res = await fetch(API + '/projects', {
                 method: 'POST',
                 headers: { 
                     'Authorization': 'Bearer ' + token,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ name })
+                body: JSON.stringify({ name, root_domain, subdomain })
             });
             if (res.ok) {
                 loadProjects();
@@ -300,7 +301,11 @@
 
         function showCreateProject() {
             const name = prompt('请输入项目名称:');
-            if (name) createProject(name);
+            if (!name) return;
+            const root_domain = prompt('请输入根域名 (如 narwal.com):');
+            if (!root_domain) return;
+            const subdomain = prompt('请输入二级域名 (可选，如 ca.narwal.com):') || '';
+            createProject(name, root_domain, subdomain);
         }
 
         async function deleteProject(id) {
@@ -317,6 +322,14 @@
             const projectId = document.getElementById('project-select').value;
             if (!projectId) return;
 
+            // 显示目标域名
+            const select = document.getElementById('project-select');
+            const option = select.options[select.selectedIndex];
+            const rootDomain = option.dataset.root || '';
+            const subDomain = option.dataset.sub || '';
+            const targetUrl = subDomain || rootDomain;
+            document.getElementById('keyword-target').textContent = '追踪目标: ' + targetUrl;
+
             const res = await fetch(API + '/projects/' + projectId + '/keywords', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
@@ -330,7 +343,7 @@
                         <div class="bg-white p-4 rounded-lg shadow flex justify-between items-center">
                             <div class="cursor-pointer flex-1" onclick="showKeywordHistory(${k.id}, '${k.keyword}')">
                                 <span class="font-bold">${k.keyword}</span>
-                                <span class="text-sm text-gray-500 ml-2">${k.country_code} / ${k.tracking_interval_hours}h</span>
+                                <span class="text-sm text-gray-500 ml-2">${targetUrl} | ${k.country_code} / ${k.tracking_interval_hours}h</span>
                                 ${k.latest_rank ? `<span class="ml-2 px-2 py-1 bg-green-100 text-green-700 rounded">#${k.latest_rank}</span>` : ''}
                             </div>
                             <button onclick="deleteKeyword(${k.id})" class="text-red-600 ml-4">删除</button>
