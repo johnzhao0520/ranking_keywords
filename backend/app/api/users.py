@@ -142,3 +142,76 @@ def get_dashboard(
         credits_remaining=credits,
         credits_used_this_month=abs(credits_used)
     )
+
+
+# ============ Admin: User Management ============
+@router.post("/admin/add-credits")
+def admin_add_credits(
+    user_email: str,
+    amount: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """管理员给用户添加积分"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Permission denied")
+    
+    # 查找目标用户
+    user = db.query(User).filter(User.email == user_email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # 查找或创建订阅
+    subscription = db.query(Subscription).filter(
+        Subscription.user_id == user.id,
+        Subscription.status == SubscriptionStatus.ACTIVE.value
+    ).first()
+    
+    if subscription:
+        subscription.credits += amount
+    else:
+        subscription = Subscription(
+            user_id=user.id,
+            plan_id=1,
+            credits=amount,
+            status=SubscriptionStatus.ACTIVE.value
+        )
+        db.add(subscription)
+    
+    # 记录交易
+    transaction = CreditTransaction(
+        user_id=user.id,
+        amount=amount,
+        transaction_type="purchase",
+        description=f"Admin added credits: {current_user.email}"
+    )
+    db.add(transaction)
+    db.commit()
+    
+    return {"message": f"Added {amount} credits to {user_email}", "new_balance": subscription.credits}
+
+
+@router.get("/admin/users")
+def admin_list_users(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """管理员查看所有用户"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Permission denied")
+    
+    users = db.query(User).all()
+    result = []
+    for u in users:
+        sub = db.query(Subscription).filter(
+            Subscription.user_id == u.id,
+            Subscription.status == SubscriptionStatus.ACTIVE.value
+        ).first()
+        result.append({
+            "id": u.id,
+            "email": u.email,
+            "username": u.username,
+            "credits": sub.credits if sub else 0,
+            "role": u.role
+        })
+    return result

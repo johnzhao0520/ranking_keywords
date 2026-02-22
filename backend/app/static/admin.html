@@ -70,6 +70,7 @@
                     <a href="#" onclick="showPage('projects')" class="block px-4 py-2 rounded hover:bg-gray-100">📁 项目管理</a>
                     <a href="#" onclick="showPage('keywords')" class="block px-4 py-2 rounded hover:bg-gray-100">🔍 关键词</a>
                     <a href="#" onclick="showPage('settings')" class="block px-4 py-2 rounded hover:bg-gray-100">⚙️ 设置</a>
+                    <a href="#" onclick="showPage('admin')" class="block px-4 py-2 rounded hover:bg-gray-100">👥 用户管理</a>
                     <a href="#" onclick="logout()" class="block px-4 py-2 rounded hover:bg-gray-100 text-red-600">🚪 退出</a>
                 </nav>
             </div>
@@ -148,6 +149,19 @@
                         <p class="text-gray-500 mb-4">联系管理员购买积分</p>
                     </div>
                 </div>
+
+                <!-- Admin: User Management -->
+                <div id="page-admin" class="hidden">
+                    <h2 class="text-2xl font-bold mb-6">用户管理</h2>
+                    <div class="bg-white rounded-lg shadow p-4 mb-4">
+                        <div class="flex gap-4">
+                            <input type="text" id="admin-user-email" placeholder="用户邮箱" class="border rounded px-3 py-2 flex-1">
+                            <input type="number" id="admin-credits-amount" placeholder="积分数量" class="border rounded px-3 py-2 w-32">
+                            <button onclick="adminAddCredits()" class="bg-blue-600 text-white px-4 py-2 rounded-lg">添加积分</button>
+                        </div>
+                    </div>
+                    <div id="users-list" class="space-y-2"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -159,13 +173,14 @@
 
         // 页面切换
         function showPage(page) {
-            ['dashboard', 'projects', 'keywords', 'settings'].forEach(p => {
+            ['dashboard', 'projects', 'keywords', 'settings', 'admin'].forEach(p => {
                 document.getElementById('page-' + p).classList.add('hidden');
             });
             document.getElementById('page-' + page).classList.remove('hidden');
             if (page === 'dashboard') loadDashboard();
             if (page === 'projects') loadProjects();
             if (page === 'keywords') { loadProjects(); loadKeywords(); }
+            if (page === 'admin') loadAdminUsers();
         }
 
         function showLogin() {
@@ -555,6 +570,55 @@
             }
             btn.textContent = '追踪';
             btn.disabled = false;
+        }
+
+        // 管理员：加载用户列表
+        async function loadAdminUsers() {
+            const res = await fetch(API + '/users/admin/users', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (res.status === 403) {
+                document.getElementById('users-list').innerHTML = '<p class="text-red-500">权限不足</p>';
+                return;
+            }
+            if (res.ok) {
+                const users = await res.json();
+                document.getElementById('users-list').innerHTML = users.map(u => `
+                    <div class="bg-white p-4 rounded-lg shadow flex justify-between items-center">
+                        <div>
+                            <span class="font-bold">${u.email}</span>
+                            <span class="text-sm text-gray-500 ml-2">(${u.username})</span>
+                            <span class="text-sm ml-2 px-2 py-1 bg-gray-100 rounded">${u.role}</span>
+                        </div>
+                        <div class="text-blue-600 font-bold">${u.credits} 积分</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // 管理员：添加积分
+        async function adminAddCredits() {
+            const email = document.getElementById('admin-user-email').value;
+            const amount = parseInt(document.getElementById('admin-credits-amount').value);
+            
+            if (!email || !amount) {
+                alert('请输入邮箱和积分数量');
+                return;
+            }
+            
+            const res = await fetch(API + '/users/admin/add-credits?user_email=' + encodeURIComponent(email) + '&amount=' + amount, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (res.ok) {
+                const data = await res.json();
+                alert('添加成功！新余额: ' + data.new_balance);
+                loadAdminUsers();
+            } else {
+                const err = await res.json();
+                alert('添加失败: ' + (err.detail || '未知错误'));
+            }
         }
 
         // 初始化

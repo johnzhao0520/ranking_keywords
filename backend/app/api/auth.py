@@ -71,26 +71,8 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_user)
     
-    # Create default subscription with some free credits
-    default_plan = db.query(Plan).filter(Plan.name == "Free").first()
-    if default_plan:
-        subscription = Subscription(
-            user_id=db_user.id,
-            plan_id=default_plan.id,
-            credits=default_plan.credits,
-            status=SubscriptionStatus.ACTIVE.value
-        )
-        db.add(subscription)
-        
-        # Record transaction
-        transaction = CreditTransaction(
-            user_id=db_user.id,
-            amount=default_plan.credits,
-            transaction_type="purchase",
-            description="Welcome bonus"
-        )
-        db.add(transaction)
-        db.commit()
+    # 新用户不自动添加积分，需要管理员分配
+    # (积分管理功能稍后添加)
     
     return db_user
 
