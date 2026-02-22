@@ -61,6 +61,12 @@ async def track_keyword(
     snippet = None
     
     results = result.get("results", [])
+    
+    # 保存完整 SERP 结果（Top 10）
+    import json
+    serp_top10 = results[:10] if results else []
+    serp_results_json = json.dumps(serp_top10)
+    
     for idx, r in enumerate(results, 1):
         if target_domain and target_domain in r.get("domain", ""):
             rank = idx
@@ -96,6 +102,7 @@ async def track_keyword(
         url=url,
         title=title,
         snippet=snippet,
+        serp_results=serp_results_json,
         credits_used=credits_used
     )
     db.add(rank_result)
