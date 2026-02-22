@@ -125,7 +125,8 @@ class Keyword(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
-    keyword = Column(String(500), nullable=False)
+    keyword = Column(String(500))
+    target_url = Column(String(500)), nullable=False)
     country_code = Column(String(10), default="com")  # Google country: com, co.uk, co.jp, etc.
     language = Column(String(10), default="en")
     tracking_interval_hours = Column(Integer, default=24)  # 1, 6, 12, 24

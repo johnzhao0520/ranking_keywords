@@ -130,6 +130,7 @@ class ProjectMemberAdd(BaseModel):
 # ============ Keyword Schemas ============
 class KeywordBase(BaseModel):
     keyword: str = Field(..., min_length=1, max_length=500)
+    target_url: Optional[str] = None  # 要追踪的网址，如 https://example.com
     country_code: str = "com"
     language: str = "en"
     tracking_interval_hours: int = 24

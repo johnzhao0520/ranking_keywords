@@ -116,7 +116,7 @@
                             <select id="project-select" class="border rounded px-3 py-2">
                                 <option value="">选择项目</option>
                             </select>
-                            <input type="text" id="new-keyword" placeholder="输入关键词" class="border rounded px-3 py-2 flex-1">
+                            <input type="text" id="new-keyword" placeholder="目标网址 (如 example.com)" class="border rounded px-3 py-2 flex-1">
                             <select id="country-select" class="border rounded px-3 py-2">
                                 <option value="com">美国 (Google.com)</option>
                                 <option value="co.uk">英国</option>
@@ -456,7 +456,7 @@
             const interval = document.getElementById('interval-select').value;
 
             if (!projectId || !keyword) {
-                alert('请选择项目并输入关键词');
+                alert('请选择项目并目标网址 (如 example.com)');
                 return;
             }
 
