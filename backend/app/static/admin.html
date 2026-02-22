@@ -346,7 +346,10 @@
                                 <span class="text-sm text-gray-500 ml-2">${targetUrl} | ${k.country_code} / ${k.tracking_interval_hours}h</span>
                                 ${k.latest_rank ? `<span class="ml-2 px-2 py-1 bg-green-100 text-green-700 rounded">#${k.latest_rank}</span>` : ''}
                             </div>
-                            <button onclick="deleteKeyword(${k.id})" class="text-red-600 ml-4">删除</button>
+                            <div class="flex items-center gap-2">
+                                <button onclick="trackKeyword(${k.id}, this)" class="text-blue-600 hover:text-blue-800 text-sm">追踪</button>
+                                <button onclick="deleteKeyword(${k.id})" class="text-red-600 ml-2">删除</button>
+                            </div>
                         </div>
                     `).join('');
                 }
@@ -500,6 +503,30 @@
                 headers: { 'Authorization': 'Bearer ' + token }
             });
             loadKeywords();
+        }
+
+        // 手动触发关键词追踪
+        async function trackKeyword(id, btn) {
+            btn.textContent = '追踪中...';
+            btn.disabled = true;
+            try {
+                const res = await fetch(API + '/tracking/keywords/' + id + '/track', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    alert('追踪成功！排名: #' + (data.rank || '未找到'));
+                    loadKeywords();
+                } else {
+                    const err = await res.json();
+                    alert('追踪失败: ' + (err.detail || '未知错误'));
+                }
+            } catch(e) {
+                alert('追踪失败: ' + e.message);
+            }
+            btn.textContent = '追踪';
+            btn.disabled = false;
         }
 
         // 初始化
