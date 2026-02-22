@@ -369,11 +369,12 @@ def get_keyword_results(
 @router.post("/{project_id}/share")
 def share_project(
     project_id: int,
-    email: str = Query(...),
-    role: str = Query("editor"),
+    request: dict,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    email = request.get("email")
+    role = request.get("role", "editor")
     """Share project with another user by email"""
     # Check ownership
     project = db.query(Project).filter(

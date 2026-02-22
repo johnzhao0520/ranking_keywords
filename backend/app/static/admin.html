@@ -516,9 +516,13 @@
             const role = prompt('角色 (editor/viewer):', 'editor');
             if (!role) return;
             
-            const res = await fetch(API + '/projects/' + projectId + '/share?email=' + encodeURIComponent(email) + '&role=' + role, {
+            const res = await fetch(API + '/projects/' + projectId + '/share', {
                 method: 'POST',
-                headers: { 'Authorization': 'Bearer ' + token }
+                headers: { 
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, role })
             });
             
             if (res.ok) {
