@@ -510,26 +510,22 @@
 
         // 分享项目
         async function shareProject(projectId, projectName) {
-            const email = prompt(`请输入要分享给 ${projectName} 的用户邮箱:`);
+            const email = prompt(`请输入要分享给 ${projectName} 的用户邮箱:\n(对方需要先注册才能收到分享)`);
             if (!email) return;
             
             const role = prompt('角色 (editor/viewer):', 'editor');
             if (!role) return;
             
-            const res = await fetch(API + '/projects/' + projectId + '/share', {
+            const res = await fetch(API + '/projects/' + projectId + '/share?email=' + encodeURIComponent(email) + '&role=' + role, {
                 method: 'POST',
-                headers: { 
-                    'Authorization': 'Bearer ' + token,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, role })
+                headers: { 'Authorization': 'Bearer ' + token }
             });
             
             if (res.ok) {
                 alert('分享成功！');
             } else {
                 const err = await res.json();
-                alert('分享失败: ' + (err.detail || '未知错误'));
+                alert('分享失败: ' + (err.detail || JSON.stringify(err)));
             }
         }
 
