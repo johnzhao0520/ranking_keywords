@@ -17,9 +17,16 @@ async def lifespan(app: FastAPI):
     logger.info("Starting application...")
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables created")
+    
+    # 启动定时任务
+    from app.services.scheduler import start_scheduler
+    start_scheduler()
+    
     yield
     # Shutdown
     logger.info("Shutting down application...")
+    from app.services.scheduler import stop_scheduler
+    stop_scheduler()
 
 
 app = FastAPI(
