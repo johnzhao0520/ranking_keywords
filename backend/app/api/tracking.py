@@ -31,6 +31,10 @@ async def track_keyword(
     if not keyword.is_active:
         raise HTTPException(status_code=400, detail="Keyword is inactive")
     
+    # Get project target URL
+    project = keyword.project
+    target_domain = project.subdomain or project.root_domain
+    
     # Check credits
     subscription = db.query(Subscription).filter(
         Subscription.user_id == current_user.id,
@@ -50,21 +54,27 @@ async def track_keyword(
     if not result:
         raise HTTPException(status_code=500, detail="Failed to track keyword")
     
-    # Find rank for the tracked URLs (we'd need to store target URLs)
-    # For now, just record the first result
+    # Find rank for target domain
     rank = None
     url = None
     title = None
     snippet = None
     
     results = result.get("results", [])
-    if results:
-        # Get first result (simplified - in production, you'd match specific URLs)
-        first_result = results[0]
-        rank = results.index(first_result) + 1
-        url = first_result.get("link")
-        title = first_result.get("title")
-        snippet = first_result.get("snippet")
+    for idx, r in enumerate(results, 1):
+        if target_domain and target_domain in r.get("domain", ""):
+            rank = idx
+            url = r.get("link")
+            title = r.get("title")
+            snippet = r.get("snippet")
+            break
+    
+    # If no match, record first result
+    if not rank and results:
+        rank = 1
+        url = results[0].get("link")
+        title = results[0].get("title")
+        snippet = results[0].get("snippet")
     
     # Calculate and deduct credits
     credits_used = google_tracker.calculate_credits(rank) if rank else 1
