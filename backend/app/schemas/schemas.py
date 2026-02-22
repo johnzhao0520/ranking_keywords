@@ -99,6 +99,8 @@ class CreditPurchase(BaseModel):
 class ProjectBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = None
+    root_domain: str = Field(..., description="根域名，如 example.com")
+    subdomain: Optional[str] = Field(None, description="二级域名，如 www.example.com")
 
 
 class ProjectCreate(ProjectBase):
@@ -108,6 +110,8 @@ class ProjectCreate(ProjectBase):
 class ProjectUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
+    root_domain: Optional[str] = None
+    subdomain: Optional[str] = None
     notification_channels: Optional[List[str]] = None
 
 
@@ -130,7 +134,6 @@ class ProjectMemberAdd(BaseModel):
 # ============ Keyword Schemas ============
 class KeywordBase(BaseModel):
     keyword: str = Field(..., min_length=1, max_length=500)
-    target_url: Optional[str] = None  # 要追踪的网址，如 https://example.com
     country_code: str = "com"
     language: str = "en"
     tracking_interval_hours: int = 24

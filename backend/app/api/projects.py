@@ -33,6 +33,8 @@ def get_projects(
             user_id=p.user_id,
             name=p.name,
             description=p.description,
+            root_domain=p.root_domain,
+            subdomain=p.subdomain,
             notification_channels=p.notification_channels or [],
             created_at=p.created_at,
             keywords_count=keywords_count
@@ -51,6 +53,8 @@ def create_project(
         user_id=current_user.id,
         name=project.name,
         description=project.description,
+        root_domain=project.root_domain,
+        subdomain=project.subdomain,
         notification_channels=project.notification_channels or []
     )
     db.add(db_project)
@@ -62,6 +66,8 @@ def create_project(
         user_id=db_project.user_id,
         name=db_project.name,
         description=db_project.description,
+        root_domain=db_project.root_domain,
+        subdomain=db_project.subdomain,
         notification_channels=db_project.notification_channels or [],
         created_at=db_project.created_at,
         keywords_count=0
@@ -95,6 +101,8 @@ def get_project(
         user_id=project.user_id,
         name=project.name,
         description=project.description,
+        root_domain=project.root_domain,
+        subdomain=project.subdomain,
         notification_channels=project.notification_channels or [],
         created_at=project.created_at,
         keywords_count=keywords_count
@@ -120,6 +128,10 @@ def update_project(
         project.name = project_update.name
     if project_update.description is not None:
         project.description = project_update.description
+    if project_update.root_domain is not None:
+        project.root_domain = project_update.root_domain
+    if project_update.subdomain is not None:
+        project.subdomain = project_update.subdomain
     if project_update.notification_channels is not None:
         project.notification_channels = project_update.notification_channels
     
@@ -133,6 +145,8 @@ def update_project(
         user_id=project.user_id,
         name=project.name,
         description=project.description,
+        root_domain=project.root_domain,
+        subdomain=project.subdomain,
         notification_channels=project.notification_channels or [],
         created_at=project.created_at,
         keywords_count=keywords_count
