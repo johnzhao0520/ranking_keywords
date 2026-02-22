@@ -363,3 +363,117 @@ def get_keyword_results(
     ).order_by(RankResult.checked_at.desc()).limit(100).all()
     
     return results
+
+
+# ============ Share Project ============
+@router.post("/{project_id}/share")
+def share_project(
+    project_id: int,
+    email: str,
+    role: str = "editor",
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Share project with another user by email"""
+    # Check ownership
+    project = db.query(Project).filter(
+        Project.id == project_id,
+        Project.user_id == current_user.id
+    ).first()
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    # Find user by email
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user.id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot share with yourself")
+    
+    # Check if already shared
+    existing = db.query(ProjectMember).filter(
+        ProjectMember.project_id == project_id,
+        ProjectMember.user_id == user.id
+    ).first()
+    
+    if existing:
+        existing.role = role
+    else:
+        member = ProjectMember(
+            project_id=project_id,
+            user_id=user.id,
+            role=role
+        )
+        db.add(member)
+    
+    db.commit()
+    return {"message": f"Project shared with {email}"}
+
+
+@router.get("/{project_id}/members")
+def get_project_members(
+    project_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get project members"""
+    project = db.query(Project).filter(Project.id == project_id).first()
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    # Check access
+    if project.user_id != current_user.id:
+        member = db.query(ProjectMember).filter(
+            ProjectMember.project_id == project_id,
+            ProjectMember.user_id == current_user.id
+        ).first()
+        if not member:
+            raise HTTPException(status_code=403, detail="Access denied")
+    
+    members = db.query(ProjectMember).filter(
+        ProjectMember.project_id == project_id
+    ).all()
+    
+    result = []
+    for m in members:
+        user = db.query(User).filter(User.id == m.user_id).first()
+        if user:
+            result.append({
+                "user_id": user.id,
+                "email": user.email,
+                "username": user.username,
+                "role": m.role
+            })
+    
+    return result
+
+
+@router.delete("/{project_id}/members/{user_id}")
+def remove_project_member(
+    project_id: int,
+    user_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Remove a member from project"""
+    project = db.query(Project).filter(
+        Project.id == project_id,
+        Project.user_id == current_user.id
+    ).first()
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    member = db.query(ProjectMember).filter(
+        ProjectMember.project_id == project_id,
+        ProjectMember.user_id == user_id
+    ).first()
+    
+    if member:
+        db.delete(member)
+        db.commit()
+    
+    return {"message": "Member removed"}

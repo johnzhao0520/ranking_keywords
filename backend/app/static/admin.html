@@ -271,7 +271,10 @@
                                 <h3 class="font-bold">${p.name}</h3>
                                 <p class="text-sm text-gray-500">${p.root_domain}${p.subdomain ? ' / ' + p.subdomain : ''} | ${p.keywords_count} 个关键词</p>
                             </div>
-                            <button onclick="deleteProject(${p.id})" class="text-red-600">删除</button>
+                            <div class="flex items-center gap-2">
+                                <button onclick="shareProject(${p.id}, '${p.name}')" class="text-blue-600 hover:text-blue-800 text-sm">分享</button>
+                                <button onclick="deleteProject(${p.id})" class="text-red-600">删除</button>
+                            </div>
                         </div>
                     `).join('');
                 }
@@ -503,6 +506,31 @@
                 headers: { 'Authorization': 'Bearer ' + token }
             });
             loadKeywords();
+        }
+
+        // 分享项目
+        async function shareProject(projectId, projectName) {
+            const email = prompt(`请输入要分享给 ${projectName} 的用户邮箱:`);
+            if (!email) return;
+            
+            const role = prompt('角色 (editor/viewer):', 'editor');
+            if (!role) return;
+            
+            const res = await fetch(API + '/projects/' + projectId + '/share', {
+                method: 'POST',
+                headers: { 
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, role })
+            });
+            
+            if (res.ok) {
+                alert('分享成功！');
+            } else {
+                const err = await res.json();
+                alert('分享失败: ' + (err.detail || '未知错误'));
+            }
         }
 
         // 手动触发关键词追踪
