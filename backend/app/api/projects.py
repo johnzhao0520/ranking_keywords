@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -369,8 +369,8 @@ def get_keyword_results(
 @router.post("/{project_id}/share")
 def share_project(
     project_id: int,
-    email: str,
-    role: str = "editor",
+    email: str = Query(...),
+    role: str = Query("editor"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
