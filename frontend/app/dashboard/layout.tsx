@@ -9,22 +9,15 @@ const navItems = [
   { href: "/keywords", label: "关键词", icon: "🔍" },
 ];
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-
-  // 登录页和注册页不需要侧边栏
-  if (pathname === "/login" || pathname === "/register" || pathname === "/") {
-    return <>{children}</>;
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* 侧边栏 */}
       <aside className="w-64 bg-gray-100 border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">
-          <Link href="/dashboard">
-            <h1 className="text-xl font-bold text-blue-600">Keyword Tracker</h1>
-          </Link>
+          <h1 className="text-xl font-bold text-blue-600">Keyword Tracker</h1>
         </div>
         <nav className="flex-1 p-4 space-y-1">
           {navItems.map((item) => {
@@ -61,7 +54,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* 主内容区 */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1">
         {children}
       </main>
     </div>
