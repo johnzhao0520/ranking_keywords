@@ -23,21 +23,25 @@ COPY backend/ ./backend
 # Copy frontend build
 COPY --from=frontend-builder /app/frontend/out ./frontend/out
 
-# Nginx config for static files + proxy API
-RUN echo 'server { \
-    listen 80; \
-    server_name _; \
-    root /app/frontend/out; \
-    index index.html; \
-    location / { \
-        try_files $uri $uri/ /index.html; \
-    }; \
-    location /api { \
-        proxy_pass http://localhost:8000; \
-        proxy_set_header Host $host; \
-        proxy_set_header X-Real-IP $remote_addr; \
-    }; \
-}' > /etc/nginx/sites-available/default
+# Nginx config - 使用 heredoc 避免转义问题
+RUN cat > /etc/nginx/sites-available/default << 'EOF'
+server {
+    listen 80;
+    server_name _;
+    root /app/frontend/out;
+    index index.html;
+    
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+    
+    location /api {
+        proxy_pass http://localhost:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+EOF
 
 # 修改 uvicorn 路径
 CMD ["sh", "-c", "cd /app/backend && uvicorn app.main:app --host 0.0.0.0 --port 8000 & nginx -g 'daemon off;'"]
