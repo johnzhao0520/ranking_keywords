@@ -215,3 +215,27 @@ def admin_list_users(
             "role": u.role
         })
     return result
+
+
+@router.delete("/admin/users/{user_id}")
+def admin_delete_user(
+    user_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """管理员删除用户"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Permission denied")
+    
+    # 不能删除自己
+    if user_id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot delete yourself")
+    
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    db.delete(user)
+    db.commit()
+    
+    return {"message": "User deleted"}

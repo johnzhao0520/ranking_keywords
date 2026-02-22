@@ -590,9 +590,30 @@
                             <span class="text-sm text-gray-500 ml-2">(${u.username})</span>
                             <span class="text-sm ml-2 px-2 py-1 bg-gray-100 rounded">${u.role}</span>
                         </div>
-                        <div class="text-blue-600 font-bold">${u.credits} 积分</div>
+                        <div class="flex items-center gap-4">
+                            <div class="text-blue-600 font-bold">${u.credits} 积分</div>
+                            <button onclick="adminDeleteUser(${u.id}, '${u.email}')" class="text-red-600 hover:text-red-800 text-sm">删除</button>
+                        </div>
                     </div>
                 `).join('');
+            }
+        }
+
+        // 管理员：删除用户
+        async function adminDeleteUser(userId, email) {
+            if (!confirm('确定要删除用户 ' + email + ' 吗？此操作不可恢复！')) return;
+            
+            const res = await fetch(API + '/users/admin/users/' + userId, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (res.ok) {
+                alert('删除成功');
+                loadAdminUsers();
+            } else {
+                const err = await res.json();
+                alert('删除失败: ' + (err.detail || '未知错误'));
             }
         }
 
