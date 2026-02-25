@@ -8,5 +8,20 @@
     "numReplicas": 1,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
+  },
+  "plugins": {
+    "cron": {
+      "version": 2,
+      "regions": ["us-west2"],
+      "jobs": [
+        {
+          "name": "keyword-tracking",
+          "description": "每小时追踪到期的关键词",
+          "schedule": "0 * * * *",
+          "command": "curl -X POST https://${{KeywordTracker.PRODUCTION_DOMAIN}}/api/tracking/process",
+          "enabled": true
+        }
+      ]
+    }
   }
 }

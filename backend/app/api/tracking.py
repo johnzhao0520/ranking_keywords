@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
+import logging
 
 from app.core.database import get_db
 from app.api.auth import get_current_user
@@ -8,7 +9,22 @@ from app.models.models import User, Keyword, RankResult, Subscription, CreditTra
 from app.services.tracker import google_tracker
 from app.schemas.schemas import RankResultResponse
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/tracking", tags=["Tracking"])
+
+
+@router.post("/process")
+async def process_due_keywords():
+    """定时任务：处理所有到期的关键词（供 Railway Cron 调用）"""
+    from app.services.scheduler import process_due_keywords as run_scheduler
+    
+    try:
+        result = await run_scheduler()
+        return {"status": "success", "result": result}
+    except Exception as e:
+        logger.error(f"定时任务执行失败: {e}")
+        return {"status": "error", "error": str(e)}
 
 
 @router.post("/keywords/{keyword_id}/track", response_model=RankResultResponse)
