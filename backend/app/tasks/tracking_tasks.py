@@ -7,7 +7,7 @@ from app.core.config import settings
 from app.core.database import SessionLocal
 from app.models.models import Keyword, RankResult, Subscription, CreditTransaction, SubscriptionStatus
 from app.services.tracker import google_tracker
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import asyncio
 
 # Initialize Celery
@@ -108,7 +108,7 @@ def process_all_keywords_task():
     
     db = SessionLocal()
     try:
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         
         # Get all active keywords
         keywords = db.query(Keyword).filter(

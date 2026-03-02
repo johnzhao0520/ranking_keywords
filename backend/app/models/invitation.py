@@ -41,7 +41,7 @@ def create_invitation(db, user_id: int, max_uses: int = 1, days_until_expiry: in
     from datetime import datetime, timedelta
     
     code = generate_code()
-    expires_at = datetime.utcnow() + timedelta(days=days_until_expiry)
+    expires_at = datetime.now(timezone.utc) + timedelta(days=days_until_expiry)
     
     invitation = InvitationCode(
         code=code,
@@ -68,7 +68,7 @@ def validate_code(db, code: str) -> tuple[bool, str]:
     if not invitation:
         return False, "邀请码无效"
     
-    if invitation.expires_at and invitation.expires_at.isoformat() < datetime.utcnow().isoformat():
+    if invitation.expires_at and invitation.expires_at.isoformat() < datetime.now(timezone.utc).isoformat():
         return False, "邀请码已过期"
     
     if invitation.uses_count >= invitation.max_uses:
@@ -90,7 +90,7 @@ def use_code(db, code: str, user_id: int) -> bool:
         return False
     
     invitation.used_by = user_id
-    invitation.used_at = datetime.utcnow()
+    invitation.used_at = datetime.now(timezone.utc)
     invitation.uses_count += 1
     
     if invitation.uses_count >= invitation.max_uses:

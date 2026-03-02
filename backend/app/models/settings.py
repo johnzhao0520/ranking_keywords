@@ -83,5 +83,5 @@ if settings.data_retention == DataRetention.KEEP_FOREVER.value:
     pass
 elif settings.data_retention == DataRetention.RETAIN_365_DAYS.value:
     # Delete data older than 365 days
-    cutoff = datetime.utcnow() - timedelta(days=365)
+    cutoff = datetime.now(timezone.utc) - timedelta(days=365)
 """

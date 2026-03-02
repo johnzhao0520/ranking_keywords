@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
+import os
 
 from app.core.config import settings
 from app.core.database import Base, engine
@@ -18,15 +19,20 @@ async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables created")
     
-    # 启动定时任务
-    from app.services.scheduler import start_scheduler
-    start_scheduler()
+    # 仅在本地开发时启动定时任务（ Railway 使用 Cron 调用 /api/tracking/process）
+    if os.getenv("RUN_SCHEDULER", "false").lower() == "true":
+        from app.services.scheduler import start_scheduler
+        start_scheduler()
+        logger.info("APScheduler started (RUN_SCHEDULER=true)")
+    else:
+        logger.info("APScheduler disabled - use Railway Cron to call /api/tracking/process")
     
     yield
     # Shutdown
     logger.info("Shutting down application...")
-    from app.services.scheduler import stop_scheduler
-    stop_scheduler()
+    if os.getenv("RUN_SCHEDULER", "false").lower() == "true":
+        from app.services.scheduler import stop_scheduler
+        stop_scheduler()
 
 
 app = FastAPI(

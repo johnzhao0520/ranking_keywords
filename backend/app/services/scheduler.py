@@ -1,9 +1,10 @@
 """
 定时任务服务 - 使用 APScheduler
 """
+import os
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from app.core.database import SessionLocal
 from app.models.models import Keyword, RankResult, Subscription, CreditTransaction, SubscriptionStatus
 from app.services.tracker import google_tracker
@@ -13,6 +14,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 scheduler = AsyncIOScheduler()
+
+
+def get_now():
+    """获取当前时间（带时区）"""
+    return datetime.now(timezone.utc)
 
 
 async def track_keyword_task(keyword_id: int):
@@ -113,7 +119,7 @@ async def process_due_keywords():
     """处理所有到期的关键词"""
     db = SessionLocal()
     try:
-        now = datetime.utcnow()
+        now = get_now()
         
         # 获取所有活跃关键词
         keywords = db.query(Keyword).filter(
