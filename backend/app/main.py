@@ -18,7 +18,7 @@ async def lifespan(app: FastAPI):
     logger.info("Starting application...")
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables created")
-    
+
     # 仅在本地开发时启动定时任务（ Railway 使用 Cron 调用 /api/tracking/process）
     if os.getenv("RUN_SCHEDULER", "false").lower() == "true":
         from app.services.scheduler import start_scheduler
@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
         logger.info("APScheduler started (RUN_SCHEDULER=true)")
     else:
         logger.info("APScheduler disabled - use Railway Cron to call /api/tracking/process")
-    
+
     yield
     # Shutdown
     logger.info("Shutting down application...")

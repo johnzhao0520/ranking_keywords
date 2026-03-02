@@ -18,12 +18,25 @@ router = APIRouter(prefix="/tracking", tags=["Tracking"])
 async def process_due_keywords():
     """定时任务：处理所有到期的关键词（供 Railway Cron 调用）"""
     from app.services.scheduler import process_due_keywords as run_scheduler
-    
+
     try:
         result = await run_scheduler()
         return {"status": "success", "result": result}
     except Exception as e:
         logger.error(f"定时任务执行失败: {e}")
+        return {"status": "error", "error": str(e)}
+
+
+@router.post("/test-process")
+async def test_process_keywords():
+    """测试用：每分钟追踪所有活跃关键词（不计入积分）"""
+    from app.services.scheduler import test_track_all_keywords as run_test
+
+    try:
+        result = await run_test()
+        return {"status": "success", "result": result}
+    except Exception as e:
+        logger.error(f"测试追踪执行失败: {e}")
         return {"status": "error", "error": str(e)}
 
 
