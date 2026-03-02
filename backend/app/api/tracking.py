@@ -5,7 +5,7 @@ import logging
 
 from app.core.database import get_db
 from app.api.auth import get_current_user
-from app.models.models import User, Keyword, RankResult, Subscription, CreditTransaction, SubscriptionStatus
+from app.models.models import User, Keyword, RankResult, Subscription, CreditTransaction, SubscriptionStatus, ProjectMember
 from app.services.tracker import google_tracker
 from app.schemas.schemas import RankResultResponse
 
@@ -47,15 +47,24 @@ async def track_keyword(
     db: Session = Depends(get_db)
 ):
     """Manually trigger tracking for a keyword"""
-    
-    # Get keyword and check ownership
+
+    # Get keyword and check ownership or membership
     keyword = db.query(Keyword).join(Keyword.project).filter(
-        Keyword.id == keyword_id,
-        Keyword.project.has(user_id=current_user.id)
+        Keyword.id == keyword_id
     ).first()
-    
+
     if not keyword:
         raise HTTPException(status_code=404, detail="Keyword not found")
+
+    # Check if user is owner or member
+    project = keyword.project
+    if project.user_id != current_user.id:
+        member = db.query(ProjectMember).filter(
+            ProjectMember.project_id == project.id,
+            ProjectMember.user_id == current_user.id
+        ).first()
+        if not member:
+            raise HTTPException(status_code=403, detail="Access denied")
     
     if not keyword.is_active:
         raise HTTPException(status_code=400, detail="Keyword is inactive")
