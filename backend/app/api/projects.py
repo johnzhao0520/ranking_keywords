@@ -335,17 +335,27 @@ def delete_keyword(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    # Check ownership or membership
     keyword = db.query(Keyword).join(Project).filter(
-        Keyword.id == keyword_id,
-        Project.user_id == current_user.id
+        Keyword.id == keyword_id
     ).first()
-    
+
     if not keyword:
         raise HTTPException(status_code=404, detail="Keyword not found")
-    
+
+    # Check if user is owner or member
+    project = keyword.project
+    if project.user_id != current_user.id:
+        member = db.query(ProjectMember).filter(
+            ProjectMember.project_id == project.id,
+            ProjectMember.user_id == current_user.id
+        ).first()
+        if not member:
+            raise HTTPException(status_code=403, detail="Access denied")
+
     db.delete(keyword)
     db.commit()
-    
+
     return {"message": "Keyword deleted"}
 
 
