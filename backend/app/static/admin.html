@@ -168,7 +168,10 @@
     </div>
 
     <script>
-        const API = 'http://localhost:8000/api';
+        // 动态设置 API 地址
+        const API = window.location.hostname.includes('railway')
+            ? 'https://rankingkeywords-production.up.railway.app/api'
+            : 'http://localhost:8000/api';
         let token = localStorage.getItem('token');
         let userId = null;
 
