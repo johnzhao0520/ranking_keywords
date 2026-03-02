@@ -520,7 +520,8 @@
         }
 
         async function deleteKeyword(id) {
-            await fetch(API + '/keywords/' + id, {
+            if (!confirm('确定要删除这个关键词吗？')) return;
+            await fetch(API + '/projects/keywords/' + id, {
                 method: 'DELETE',
                 headers: { 'Authorization': 'Bearer ' + token }
             });
