@@ -131,11 +131,17 @@ async def process_due_keywords():
         for kw in keywords:
             interval = kw.tracking_interval_hours or 24
             
+            # -1 表示每分钟
+            if interval == -1:
+                interval_minutes = 1
+            else:
+                interval_minutes = interval * 60  # 转换为分钟
+            
             if kw.results:
                 # 获取最新结果
                 last_result = kw.results[0]
                 if last_result.checked_at:
-                    next_check = last_result.checked_at + timedelta(hours=interval)
+                    next_check = last_result.checked_at + timedelta(minutes=interval_minutes)
                     if now >= next_check:
                         # 到期，执行追踪
                         await track_keyword_task(kw.id)

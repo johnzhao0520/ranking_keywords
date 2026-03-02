@@ -130,7 +130,7 @@ class Keyword(Base):
     keyword = Column(String(500), nullable=False)  # 关键词
     country_code = Column(String(10), default="com")  # Google country: com, co.uk, co.jp, etc.
     language = Column(String(10), default="en")
-    tracking_interval_hours = Column(Integer, default=24)  # 1, 6, 12, 24
+    tracking_interval_hours = Column(Integer, default=24)  # 1, 6, 12, 24 (小时); -1 表示每分钟
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
