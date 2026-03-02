@@ -244,14 +244,20 @@ def create_keyword(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Check access
-    project = db.query(Project).filter(
-        Project.id == project_id,
-        Project.user_id == current_user.id
-    ).first()
-    
+    # Check access - owner or member can add keywords
+    project = db.query(Project).filter(Project.id == project_id).first()
+
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
+
+    # Check if user is owner or member
+    if project.user_id != current_user.id:
+        member = db.query(ProjectMember).filter(
+            ProjectMember.project_id == project_id,
+            ProjectMember.user_id == current_user.id
+        ).first()
+        if not member:
+            raise HTTPException(status_code=403, detail="Access denied")
     
     db_keyword = Keyword(
         project_id=project_id,
