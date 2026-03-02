@@ -8,7 +8,6 @@ from datetime import datetime, timedelta, timezone
 from app.core.database import SessionLocal
 from app.models.models import Keyword, RankResult, Subscription, CreditTransaction, SubscriptionStatus
 from app.services.tracker import google_tracker
-import asyncio
 import logging
 
 logger = logging.getLogger(__name__)
@@ -58,6 +57,7 @@ async def track_keyword_task(keyword_id: int):
         url = None
         title = None
         snippet = None
+        credits_used = 1
 
         # 保存完整 SERP 结果（Top 10）
         import json
@@ -77,7 +77,6 @@ async def track_keyword_task(keyword_id: int):
             logger.info(f"关键词 {keyword.keyword} 未在前100名找到目标域名 {target_domain}")
             # 仍记录一次追踪，但 rank 设为 null
             rank = None
-            credits_used = 1  # 每次追踪消耗1积分
 
         # 扣除积分
         subscription.credits -= credits_used
@@ -137,20 +136,24 @@ async def process_due_keywords():
             else:
                 interval_minutes = interval * 60  # 转换为分钟
 
-            if kw.results:
-                # 获取最新结果
-                last_result = kw.results[0]
-                if last_result.checked_at:
-                    # 处理时区：确保比较的是同一类型
-                    if last_result.checked_at.tzinfo:
-                        last_checked = last_result.checked_at.replace(tzinfo=None)
-                    else:
-                        last_checked = last_result.checked_at
-                    next_check = last_checked + timedelta(minutes=interval_minutes)
-                    if now.replace(tzinfo=None) >= next_check:
-                        # 到期，执行追踪
-                        await track_keyword_task(kw.id)
-                        due_count += 1
+            last_result = db.query(RankResult).filter(
+                RankResult.keyword_id == kw.id
+            ).order_by(
+                RankResult.checked_at.desc(),
+                RankResult.id.desc()
+            ).first()
+
+            if last_result and last_result.checked_at:
+                # 处理时区：确保比较的是同一类型
+                if last_result.checked_at.tzinfo:
+                    last_checked = last_result.checked_at.replace(tzinfo=None)
+                else:
+                    last_checked = last_result.checked_at
+                next_check = last_checked + timedelta(minutes=interval_minutes)
+                if now.replace(tzinfo=None) >= next_check:
+                    # 到期，执行追踪
+                    await track_keyword_task(kw.id)
+                    due_count += 1
             else:
                 # 从未追踪，立即追踪
                 await track_keyword_task(kw.id)
@@ -248,17 +251,18 @@ def start_scheduler():
         replace_existing=True
     )
 
-    # 每分钟测试追踪（不计入积分）
-    scheduler.add_job(
-        test_track_all_keywords,
-        trigger=IntervalTrigger(minutes=1),
-        id="test_track_keywords",
-        name="测试追踪关键词(每分钟)",
-        replace_existing=True
-    )
+    if os.getenv("ENABLE_TEST_TRACKING_JOB", "false").lower() == "true":
+        scheduler.add_job(
+            test_track_all_keywords,
+            trigger=IntervalTrigger(minutes=1),
+            id="test_track_keywords",
+            name="测试追踪关键词(每分钟)",
+            replace_existing=True
+        )
+        logger.info("已启用测试追踪任务（每分钟）")
 
     scheduler.start()
-    logger.info("定时任务调度器已启动（包含每小时任务和每分钟测试任务）")
+    logger.info("定时任务调度器已启动")
 
 
 def stop_scheduler():

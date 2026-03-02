@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
 import logging
+import os
 
 from app.core.database import get_db
 from app.api.auth import get_current_user
@@ -31,6 +31,9 @@ async def process_due_keywords():
 async def test_process_keywords():
     """测试用：每分钟追踪所有活跃关键词（不计入积分）"""
     from app.services.scheduler import test_track_all_keywords as run_test
+
+    if os.getenv("ENABLE_TEST_TRACKING_API", "false").lower() != "true":
+        raise HTTPException(status_code=404, detail="Not found")
 
     try:
         result = await run_test()
