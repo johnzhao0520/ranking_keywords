@@ -72,15 +72,15 @@ async def track_keyword(
     # Get project target URL
     project = keyword.project
     target_domain = project.subdomain or project.root_domain
-    
-    # Check credits
+
+    # Check credits - 积分从项目所有者账户扣除
     subscription = db.query(Subscription).filter(
-        Subscription.user_id == current_user.id,
+        Subscription.user_id == project.user_id,
         Subscription.status == SubscriptionStatus.ACTIVE.value
     ).first()
-    
+
     if not subscription or subscription.credits <= 0:
-        raise HTTPException(status_code=402, detail="Insufficient credits")
+        raise HTTPException(status_code=402, detail="项目所有者积分不足")
     
     # Track keyword
     result = await google_tracker.track_keyword(
@@ -124,9 +124,9 @@ async def track_keyword(
     # Deduct credits
     subscription.credits -= credits_used
     
-    # Record transaction
+    # Record transaction - 积分从项目所有者账户扣除
     transaction = CreditTransaction(
-        user_id=current_user.id,
+        user_id=project.user_id,
         amount=-credits_used,
         transaction_type="consume",
         description=f"Tracked keyword: {keyword.keyword}"

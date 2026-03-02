@@ -250,7 +250,7 @@ def create_keyword(
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    # Check if user is owner or member
+    # Check if user is owner or editor
     if project.user_id != current_user.id:
         member = db.query(ProjectMember).filter(
             ProjectMember.project_id == project_id,
@@ -258,6 +258,8 @@ def create_keyword(
         ).first()
         if not member:
             raise HTTPException(status_code=403, detail="Access denied")
+        if member.role == "viewer":
+            raise HTTPException(status_code=403, detail="Viewers cannot add keywords")
     
     db_keyword = Keyword(
         project_id=project_id,
@@ -343,7 +345,7 @@ def delete_keyword(
     if not keyword:
         raise HTTPException(status_code=404, detail="Keyword not found")
 
-    # Check if user is owner or member
+    # Check if user is owner or editor
     project = keyword.project
     if project.user_id != current_user.id:
         member = db.query(ProjectMember).filter(
@@ -352,6 +354,8 @@ def delete_keyword(
         ).first()
         if not member:
             raise HTTPException(status_code=403, detail="Access denied")
+        if member.role == "viewer":
+            raise HTTPException(status_code=403, detail="Viewers cannot delete keywords")
 
     db.delete(keyword)
     db.commit()
