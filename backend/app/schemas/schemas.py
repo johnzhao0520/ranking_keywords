@@ -136,7 +136,7 @@ class KeywordBase(BaseModel):
     keyword: str = Field(..., min_length=1, max_length=500)
     country_code: str = "com"
     language: str = "en"
-    tracking_interval_hours: int = 24
+    tracking_interval_hours: int = Field(default=24, ge=-1, le=720)  # -1=每分钟, 最大30天
 
 
 class KeywordCreate(KeywordBase):
